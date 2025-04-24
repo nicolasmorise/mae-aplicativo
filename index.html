@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Gerador de Texto - Psicóloga</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    input, textarea, button, select { width: 100%; margin-bottom: 10px; padding: 8px; }
+    button { font-size: 16px; width: auto; }
+    #resultado { white-space: pre-wrap; background: #f2f2f2; padding: 10px; margin-top: 15px; }
+    #datasAdicionadas { margin-bottom: 10px; font-style: italic; color: #333; }
+  </style>
+</head>
+<body>
+
+  <h2>Gerador de Texto para Sessões</h2>
+
+  <label>Nome do Paciente:</label>
+  <input type="text" id="nome">
+
+  <label>Endereço Completo (opcional):</label>
+  <input type="text" id="endereco">
+
+  <label>Adicionar Datas das Sessões:</label>
+  <input type="date" id="dataInput">
+  <button onclick="adicionarData()">Adicionar Data</button>
+  <div id="datasAdicionadas">Nenhuma data adicionada ainda.</div>
+
+  <label>Valor Total:</label>
+  <input type="text" id="valor">
+
+  <label>CPF:</label>
+  <input type="text" id="cpf">
+
+  <label>Nome da Psicóloga:</label>
+  <input type="text" id="psicologa" value="Edinalva Alves Morise Silva">
+
+  <label>CRP:</label>
+  <input type="text" id="crp" placeholder="Digite o número do CRP">
+
+  <button onclick="gerarTexto()">Gerar Texto</button>
+  <button onclick="copiarTexto()">Copiar Texto</button>
+  <button onclick="baixarPDF()">Baixar PDF</button>
+  <button onclick="limparTudo()">Limpar Tudo</button>
+
+
+  <div id="resultado"></div>
+
+  <script>
+    let textoGerado = "";
+    let datas = [];
+
+    function adicionarData() {
+      const dataInput = document.getElementById('dataInput');
+      const data = dataInput.value;
+      if (data) {
+        datas.push(new Date(data).toLocaleDateString('pt-BR'));
+        dataInput.value = "";
+        atualizarListaDatas();
+      }
+    }
+
+    function atualizarListaDatas() {
+      const datasDiv = document.getElementById('datasAdicionadas');
+      datasDiv.textContent = datas.length > 0 ? "Datas adicionadas: " + datas.join(', ') : "Nenhuma data adicionada ainda.";
+    }
+
+    function gerarTexto() {
+      const nome = document.getElementById('nome').value;
+      const endereco = document.getElementById('endereco').value;
+      const valor = document.getElementById('valor').value;
+      const cpf = document.getElementById('cpf').value;
+      const psicologa = document.getElementById('psicologa').value;
+      const crp = document.getElementById('crp').value;
+
+      let texto = 
+`Nome: ${nome}
+Data das sessões: ${datas.join(', ')}
+Valor: ${valor}
+CPF: ${cpf}`;
+
+      if (endereco) {
+        texto += `\nEndereço: ${endereco}`;
+      }
+
+      texto += `
+
+${psicologa}
+CRP ${crp}`;
+
+      textoGerado = texto;
+      document.getElementById('resultado').textContent = textoGerado;
+    }
+
+    function copiarTexto() {
+      if (!textoGerado) return alert("Gere o texto primeiro.");
+      navigator.clipboard.writeText(textoGerado)
+        .then(() => alert("Texto copiado!"))
+        .catch(() => alert("Erro ao copiar o texto."));
+    }
+
+    function baixarPDF() {
+      if (!textoGerado) return alert("Gere o texto primeiro.");
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      doc.setFont("Times", "Normal");
+      doc.setFontSize(12);
+      doc.text(textoGerado, 10, 20);
+      doc.save("sessao_psicologa.pdf");
+    }
+
+    function limparTudo() {
+  // Limpa inputs
+    document.getElementById('nome').value = "";
+    document.getElementById('endereco').value = "";
+    document.getElementById('valor').value = "";
+    document.getElementById('cpf').value = "";
+    document.getElementById('psicologa').value = "Edinalva Alves Morise Silva";
+    document.getElementById('crp').value = "";
+    document.getElementById('dataInput').value = "";
+
+    // Limpa lista de datas e resultado
+    datas = [];
+    atualizarListaDatas();
+    textoGerado = "";
+    document.getElementById('resultado').textContent = "";
+    }
+
+  </script>
+
+</body>
+</html>
