@@ -36,9 +36,6 @@
   <label>Nome da Psicóloga:</label>
   <input type="text" id="psicologa" value="Edinalva Alves Morise Silva">
 
-  <label>CRP:</label>
-  <input type="text" id="crp" placeholder="Digite o número do CRP">
-
   <button onclick="gerarTexto()">Gerar Texto</button>
   <button onclick="copiarTexto()">Copiar Texto</button>
   <button onclick="baixarPDF()">Baixar PDF</button>
@@ -87,7 +84,7 @@ CPF: ${cpf}`;
       texto += `
 
 ${psicologa}
-CRP ${crp}`;
+CRP 06/120450`;
 
       textoGerado = texto;
       document.getElementById('resultado').textContent = textoGerado;
@@ -117,7 +114,6 @@ CRP ${crp}`;
     document.getElementById('valor').value = "";
     document.getElementById('cpf').value = "";
     document.getElementById('psicologa').value = "Edinalva Alves Morise Silva";
-    document.getElementById('crp').value = "";
     document.getElementById('dataInput').value = "";
 
     // Limpa lista de datas e resultado
