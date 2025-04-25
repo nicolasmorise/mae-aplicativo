@@ -5,11 +5,78 @@
   <title>Gerador de Texto - Psicóloga</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; }
-    input, textarea, button, select { width: 100%; margin-bottom: 10px; padding: 8px; }
-    button { font-size: 16px; width: auto; }
-    #resultado { white-space: pre-wrap; background: #f2f2f2; padding: 10px; margin-top: 15px; }
-    #datasAdicionadas { margin-bottom: 10px; font-style: italic; color: #333; }
+    <style>
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa;
+    color: #333;
+    max-width: 600px;
+    margin: 40px auto;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    background: white;
+  }
+
+  h2 {
+    text-align: center;
+    color: #44615b;
+    margin-bottom: 30px;
+  }
+
+  label {
+    font-weight: 600;
+    display: block;
+    margin-top: 15px;
+    margin-bottom: 5px;
+    color: #44615b;
+  }
+
+  input[type="text"],
+  input[type="date"] {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+  }
+
+  button {
+    background-color: #44615b;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 10px 16px;
+    cursor: pointer;
+    font-size: 15px;
+    margin-top: 10px;
+    margin-right: 10px;
+  }
+
+  button:hover {
+    background-color: #375049;
+  }
+
+  #datasAdicionadas {
+    font-style: italic;
+    color: #555;
+    background-color: #eef2f1;
+    padding: 8px;
+    border-radius: 6px;
+    margin-top: 5px;
+  }
+
+  #resultado {
+    white-space: pre-wrap;
+    background-color: #f0f4f3;
+    padding: 15px;
+    border-left: 5px solid #44615b;
+    border-radius: 6px;
+    margin-top: 20px;
+    font-size: 15px;
+  }
+</style>
+
   </style>
 </head>
 <body>
@@ -36,10 +103,17 @@
   <label>Nome da Psicóloga:</label>
   <input type="text" id="psicologa" value="Edinalva Alves Morise Silva">
 
+  <label>CRP:</label>
+  <input type="text" id="crp" value="CRP 06/120450">
+
   <button onclick="gerarTexto()">Gerar Texto</button>
   <button onclick="copiarTexto()">Copiar Texto</button>
   <button onclick="baixarPDF()">Baixar PDF</button>
   <button onclick="limparTudo()">Limpar Tudo</button>
+  <button onclick="exportarTodosPacientesPDF()">Exportar Todos os Pacientes de Hoje</button>
+
+  <h3>Pacientes do dia</h3>
+  <div id="listaPacientes"></div>
 
 
   <div id="resultado"></div>
@@ -52,7 +126,9 @@
       const dataInput = document.getElementById('dataInput');
       const data = dataInput.value;
       if (data) {
-        datas.push(new Date(data).toLocaleDateString('pt-BR'));
+        const partes = data.split("-");
+        const dataFormatada = `${partes[2]}/${partes[1]}/${partes[0]}`;
+        datas.push(dataFormatada);
         dataInput.value = "";
         atualizarListaDatas();
       }
@@ -84,7 +160,7 @@ CPF: ${cpf}`;
       texto += `
 
 ${psicologa}
-CRP 06/120450`;
+${crp}`;
 
       textoGerado = texto;
       document.getElementById('resultado').textContent = textoGerado;
@@ -108,20 +184,100 @@ CRP 06/120450`;
     }
 
     function limparTudo() {
-  // Limpa inputs
-    document.getElementById('nome').value = "";
-    document.getElementById('endereco').value = "";
-    document.getElementById('valor').value = "";
-    document.getElementById('cpf').value = "";
-    document.getElementById('psicologa').value = "Edinalva Alves Morise Silva";
-    document.getElementById('dataInput').value = "";
+      document.getElementById('nome').value = "";
+      document.getElementById('endereco').value = "";
+      document.getElementById('valor').value = "";
+      document.getElementById('cpf').value = "";
+      document.getElementById('psicologa').value = "Edinalva Alves Morise Silva";
+      document.getElementById('crp').value = "CRP 06/120450";
+      document.getElementById('dataInput').value = "";
 
-    // Limpa lista de datas e resultado
-    datas = [];
-    atualizarListaDatas();
-    textoGerado = "";
-    document.getElementById('resultado').textContent = "";
+      datas = [];
+      atualizarListaDatas();
+      textoGerado = "";
+      document.getElementById('resultado').textContent = "";
     }
+
+    let pacientesHoje = [];
+
+function gerarTexto() {
+  const nome = document.getElementById('nome').value;
+  const endereco = document.getElementById('endereco').value;
+  const valor = document.getElementById('valor').value;
+  const cpf = document.getElementById('cpf').value;
+  const psicologa = document.getElementById('psicologa').value;
+
+  let texto = 
+`Nome: ${nome}
+Data das sessões: ${datas.join(', ')}
+Valor: ${valor}
+CPF: ${cpf}`;
+
+  if (endereco) {
+    texto += `\nEndereço: ${endereco}`;
+  }
+
+  texto += `
+
+${psicologa}
+CRP 06/120450`;
+
+  textoGerado = texto;
+  document.getElementById('resultado').textContent = textoGerado;
+
+  pacientesHoje.push({ nome, texto });
+  atualizarListaPacientes();
+}
+
+function atualizarListaPacientes() {
+  const lista = document.getElementById('listaPacientes');
+  lista.innerHTML = "";
+
+  pacientesHoje.forEach((p, index) => {
+    const item = document.createElement("div");
+    item.style.marginBottom = "8px";
+    item.innerHTML = `<strong>${p.nome}</strong> 
+      <button onclick="removerPaciente(${index})">❌ Remover</button>`;
+    lista.appendChild(item);
+  });
+}
+
+function removerPaciente(index) {
+  if (confirm("Tem certeza que deseja remover este paciente?")) {
+    pacientesHoje.splice(index, 1);
+    atualizarListaPacientes();
+  }
+}
+
+function exportarTodosPacientesPDF() {
+  if (pacientesHoje.length === 0) {
+    alert("Nenhum paciente registrado ainda hoje.");
+    return;
+  }
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  doc.setFont("Times", "Normal");
+  doc.setFontSize(12);
+
+  let y = 20;
+  pacientesHoje.forEach((p, i) => {
+    doc.text(`Paciente ${i + 1}:`, 10, y);
+    y += 7;
+    const linhas = doc.splitTextToSize(p.texto, 180);
+    doc.text(linhas, 10, y);
+    y += linhas.length * 6 + 10;
+
+    if (y > 270) {
+      doc.addPage();
+      y = 20;
+    }
+  });
+
+  const dataHoje = new Date().toLocaleDateString('pt-BR').replace(/\//g, '-');
+  doc.save(`pacientes_${dataHoje}.pdf`);
+}
+
 
   </script>
 
